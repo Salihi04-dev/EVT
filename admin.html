@@ -6,41 +6,93 @@
   <title>EventPass Admin</title>
   <script src="js/qrcode.min.js"></script>
     <style>
+    :root{
+      --bg:#0b1220;
+      --panel:rgba(16,26,46,.90);
+      --panel-soft:rgba(255,255,255,.03);
+      --line:rgba(255,255,255,.08);
+      --text:#e8eefc;
+      --muted:#90a0c0;
+      --brand:#4f46e5;
+      --brand-soft:rgba(79,70,229,.15);
+      --teal:#14b8a6;
+      --success:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 24px 70px rgba(0,0,0,.32);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f4f5f9;
-      color: #1a1a2e;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
+        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      background-attachment: fixed;
+      padding-bottom: 40px;
     }
+
     .header {
-      background: #1a1a2e;
-      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11,18,32,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
       padding: 16px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .header h2 { font-size: 17px; }
-    .header a { color: #f87171; font-size: 13px; text-decoration: none; }
+    .header .brand { display: flex; align-items: center; gap: 10px; }
+    .header .brand-mark {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--brand), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex: 0 0 auto;
+      box-shadow: 0 8px 20px rgba(79,70,229,.35);
+    }
+    .header .brand small { display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px }
+    .header h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .header a.logout-link {
+      color: var(--text);
+      font-size: 13px;
+      text-decoration: none;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      transition: border-color .15s, background .15s;
+    }
+    .header a.logout-link:hover { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); color: #fca5a5; }
 
     .tabs {
       display: flex;
       overflow-x: auto;
-      background: #fff;
-      border-bottom: 1px solid #e5e5e5;
+      gap: 4px;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--line);
+      padding: 0 16px;
+      scrollbar-width: none;
     }
+    .tabs::-webkit-scrollbar { display: none; }
     .tab {
-      padding: 14px 18px;
+      padding: 14px 16px;
       font-size: 13px;
       font-weight: 600;
-      color: #888;
+      color: var(--muted);
       cursor: pointer;
       white-space: nowrap;
-      border-bottom: 3px solid transparent;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
     }
-    .tab.active { color: #4f46e5; border-color: #4f46e5; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); border-color: var(--brand); }
 
-    .view { display: none; padding: 16px; }
+    .view { display: none; padding: 18px 16px 8px; max-width: 1080px; margin: 0 auto; }
     .view.active { display: block; }
 
     .cards {
@@ -50,91 +102,173 @@
       margin-bottom: 16px;
     }
     .stat-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px 16px;
       text-align: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
     }
-    .stat-card .num { font-size: 26px; font-weight: 800; }
-    .stat-card .label { font-size: 12px; color: #888; margin-top: 4px; }
+    .stat-card .num { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+    .stat-card .label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
 
     .section {
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
       margin-bottom: 14px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
     }
-    .section h3 { font-size: 14px; margin-bottom: 10px; }
+    .section h3 { font-size: 13px; margin-bottom: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
 
-    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
-    .bar-row .hour { width: 50px; color: #888; }
-    .bar-fill { background: #4f46e5; height: 16px; border-radius: 4px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12px; }
+    .bar-row .hour { width: 50px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .bar-row > div:last-child { font-variant-numeric: tabular-nums; color: var(--text); min-width: 20px; }
+    .bar-fill { background: linear-gradient(90deg, var(--brand), var(--teal)); height: 14px; border-radius: 5px; min-width: 3px; }
 
-    .activity-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-    .activity-item:last-child { border: none; }
+    .activity-item { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+    .activity-item:last-child { border: none; padding-bottom: 0; }
+    .activity-item span:last-child { color: var(--muted); white-space: nowrap; font-size: 12px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #f0f0f0; }
-    th { color: #888; font-weight: 600; font-size: 11px; text-transform: uppercase; }
-    .badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .badge.unused { background: #d1fae5; color: #059669; }
-    .badge.used { background: #e5e7eb; color: #4b5563; }
-    .badge.active { background: #d1fae5; color: #059669; }
-    .badge.inactive { background: #fee2e2; color: #dc2626; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    tbody tr { transition: background .12s; }
+    tbody tr:hover { background: rgba(255,255,255,.025); }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-block; }
+    .badge.unused { background: rgba(34,197,94,.15); color: #4ade80; }
+    .badge.used { background: rgba(148,163,184,.15); color: #94a3b8; }
+    .badge.active { background: rgba(34,197,94,.15); color: #4ade80; }
+    .badge.inactive { background: rgba(239,68,68,.15); color: #f87171; }
 
     input, select, textarea {
       width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
       font-size: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       outline: none;
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      font-family: inherit;
+      transition: border-color .15s, background .15s;
     }
-    input:focus, select:focus { border-color: #4f46e5; }
-    label { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 4px; }
+    input::placeholder { color: #5b6b8c; }
+    input:focus, select:focus, textarea:focus { border-color: var(--brand); background: rgba(79,70,229,.06); }
+    select option { background: #0f172a; color: var(--text); }
+    label { font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
 
     .btn {
-      padding: 11px 16px;
-      background: #4f46e5;
+      padding: 12px 16px;
+      background: var(--brand);
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-weight: 700;
       font-size: 13px;
       cursor: pointer;
+      transition: transform .1s, filter .15s;
+      font-family: inherit;
     }
-    .btn.secondary { background: #6b7280; }
-    .btn.danger { background: #dc2626; }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn.secondary { background: rgba(255,255,255,.06); border: 1px solid var(--line); color: var(--text); }
+    .btn.danger { background: linear-gradient(180deg,#ef4444 0%, #dc2626 100%); }
     .btn.full { width: 100%; }
-    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 6px; }
+    .btn-sm { padding: 7px 11px; font-size: 12px; border-radius: 9px; }
 
-    .row-actions { display: flex; gap: 6px; }
-    .search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
     .search-bar input { margin-bottom: 0; flex: 1; }
 
+    .toolbar { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+
+    #loadErrorBanner {
+      background: rgba(239,68,68,.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,.3);
+      padding: 12px 16px;
+      font-size: 13px;
+      white-space: pre-wrap;
+      border-radius: 14px;
+      margin: 14px 16px 0;
+      max-width: 1080px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ---- Popup / modal system, mirrored from scanner.html ---- */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      position: fixed; inset: 0; background: rgba(2,6,23,.68);
       display: none; align-items: center; justify-content: center;
-      z-index: 999; padding: 20px;
+      z-index: 999; padding: 18px;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: #fff; border-radius: 14px; padding: 22px;
-      max-width: 400px; width: 100%; max-height: 85vh; overflow-y: auto;
+      width: 100%; max-width: 440px;
+      border-radius: 28px;
+      background: linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
+      color: #0f172a;
+      box-shadow: 0 30px 90px rgba(0,0,0,.38);
+      overflow: hidden;
+      border: 1px solid rgba(15,23,42,.08);
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
     }
-    .modal h3 { margin-bottom: 14px; }
-    .modal-close { float: right; cursor: pointer; font-size: 20px; color: #888; }
+    .modal-head {
+      padding: 22px 22px 14px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      flex: 0 0 auto;
+    }
+    .modal-icon {
+      width: 48px; height: 48px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex: 0 0 auto;
+      background: var(--brand-soft); color: var(--brand);
+    }
+    .modal-headtext { flex: 1 1 auto; min-width: 0; }
+    .modal-eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: #64748b; margin-bottom: 4px; }
+    .modal h3.modal-title { font-size: 20px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+    .modal-sub { font-size: 13px; color: #475569; line-height: 1.5; margin-top: 4px; }
+    .modal-close {
+      cursor: pointer; font-size: 18px; color: #94a3b8; flex: 0 0 auto;
+      width: 30px; height: 30px; border-radius: 999px; display: flex;
+      align-items: center; justify-content: center; transition: background .12s, color .12s;
+      line-height: 1;
+    }
+    .modal-close:hover { background: rgba(15,23,42,.06); color: #0f172a; }
+    .modal-body { padding: 18px 22px 4px; overflow-y: auto; }
+    .modal-body label:first-child { margin-top: 0; }
+    .modal-foot { padding: 16px 22px 22px; flex: 0 0 auto; display: flex; gap: 10px; flex-wrap: wrap; }
+    .modal-foot .btn { flex: 1 1 140px; }
+
+    .modal input, .modal select, .modal textarea {
+      background: #fff; border: 1.5px solid rgba(15,23,42,.12); color: #0f172a;
+    }
+    .modal input::placeholder { color: #94a3b8; }
+    .modal input:focus, .modal select:focus { border-color: var(--brand); background: #fff; }
+    .modal label { color: #64748b; }
+    .modal .btn.secondary { background: #fff; border: 1px solid rgba(15,23,42,.12); color: #0f172a; }
+    .modal p.hint { font-size: 12px; color: #64748b; line-height: 1.55; margin-bottom: 14px; }
 
     .ticket-preview {
-      border: 2px dashed #ccc; border-radius: 10px; padding: 16px;
-      text-align: center; margin-bottom: 10px;
+      border: 2px dashed rgba(15,23,42,.18); border-radius: 18px; padding: 18px;
+      text-align: center; margin-bottom: 12px; background: #fafcff;
     }
     .ticket-preview canvas { margin: 10px auto; }
 
-    #csvFileInput { padding: 10px; border: 1.5px dashed #ccc; border-radius: 8px; background: #fafafa; }
+    #csvFileInput { padding: 12px; border: 1.5px dashed rgba(15,23,42,.2); border-radius: 12px; background: #fafcff; }
 
     @media print {
   body * {
@@ -155,13 +289,26 @@
   }
 }
 
+    @media (max-width: 560px) {
+      .cards { grid-template-columns: 1fr 1fr; }
+      .modal-head { padding: 20px 18px 12px; }
+      .modal-body { padding: 16px 18px 4px; }
+      .modal-foot { padding: 14px 18px 18px; }
+      .modal h3.modal-title { font-size: 18px; }
+    }
     </style>
 </head>
 <body>
 
   <div class="header">
-    <h2>🎟️ EventPass Admin</h2>
-    <a href="#" onclick="logout()">Logout</a>
+    <div class="brand">
+      <div class="brand-mark">🎟️</div>
+      <div>
+        <small>EventPass Lite</small>
+        <h2>Admin</h2>
+      </div>
+    </div>
+    <a class="logout-link" href="#" onclick="logout()">Logout</a>
   </div>
 
   <div class="tabs">
@@ -194,7 +341,7 @@
     <div class="search-bar">
       <input id="guestSearch" placeholder="Search by name or ticket ID" oninput="renderGuests()">
     </div>
-    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+    <div class="toolbar">
       <button class="btn" onclick="openModal('bulkGenerateModal')">+ Generate Blank Tickets</button>
       <button class="btn" onclick="openModal('addGuestModal')">+ Add Named Ticket</button>
       <button class="btn secondary" onclick="openModal('importModal')">Import CSV</button>
@@ -211,7 +358,9 @@
 
   <!-- STAFF -->
   <div class="view" id="staffView">
-    <button class="btn" onclick="openModal('addStaffModal')" style="margin-bottom:12px;">+ Add Staff</button>
+    <div class="toolbar">
+      <button class="btn" onclick="openModal('addStaffModal')">+ Add Staff</button>
+    </div>
     <div class="section" style="padding:0; overflow-x:auto;">
       <table>
         <thead><tr><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead>
@@ -253,93 +402,163 @@
   <!-- MODAL: Bulk Generate Blank Tickets -->
   <div class="modal-overlay" id="bulkGenerateModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('bulkGenerateModal')">&times;</span>
-      <h3>Generate Blank Tickets</h3>
-      <p style="font-size:12px; color:#888; margin-bottom:10px;">Creates tickets with no name attached — for tickets sold physically at the door or through resellers. Each gets a unique Ticket ID and QR code.</p>
-      <label>How many tickets?</label>
-      <input id="bulkCount" type="number" placeholder="e.g. 130">
-      <button class="btn full" id="bulkGenerateBtn" onclick="submitBulkGenerate()">Generate</button>
-      <div id="bulkStatus" style="font-size:13px; margin-top:8px;"></div>
+      <div class="modal-head">
+        <div class="modal-icon">🎫</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Guests</div>
+          <h3 class="modal-title">Generate Blank Tickets</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('bulkGenerateModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Creates tickets with no name attached — for tickets sold physically at the door or through resellers. Each gets a unique Ticket ID and QR code.</p>
+        <label>How many tickets?</label>
+        <input id="bulkCount" type="number" placeholder="e.g. 130">
+        <div id="bulkStatus" style="font-size:13px; margin-top:-2px; margin-bottom:8px; color:#475569;"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" id="bulkGenerateBtn" onclick="submitBulkGenerate()">Generate</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Add Named Ticket -->
   <div class="modal-overlay" id="addGuestModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('addGuestModal')">&times;</span>
-      <h3>Add Named Ticket</h3>
-      <p style="font-size:12px; color:#888; margin-bottom:10px;">Use this if you already know who the ticket is for (e.g. VIP list, pre-registered guest).</p>
-      <label>Name</label>
-      <input id="newGuestName">
-      <label>Phone</label>
-      <input id="newGuestPhone">
-      <button class="btn full" id="addGuestBtn" onclick="submitAddGuest()">Create Ticket</button>
+      <div class="modal-head">
+        <div class="modal-icon">👤</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Guests</div>
+          <h3 class="modal-title">Add Named Ticket</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('addGuestModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Use this if you already know who the ticket is for (e.g. VIP list, pre-registered guest).</p>
+        <label>Name</label>
+        <input id="newGuestName">
+        <label>Phone</label>
+        <input id="newGuestPhone">
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" id="addGuestBtn" onclick="submitAddGuest()">Create Ticket</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Edit Guest -->
   <div class="modal-overlay" id="editGuestModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('editGuestModal')">&times;</span>
-      <h3>Edit Guest</h3>
-      <input type="hidden" id="editGuestTicketId">
-      <label>Name</label>
-      <input id="editGuestName">
-      <label>Phone</label>
-      <input id="editGuestPhone">
-      <button class="btn full" onclick="submitEditGuest()">Save Changes</button>
+      <div class="modal-head">
+        <div class="modal-icon">✎</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Guests</div>
+          <h3 class="modal-title">Edit Guest</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('editGuestModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editGuestTicketId">
+        <label>Name</label>
+        <input id="editGuestName">
+        <label>Phone</label>
+        <input id="editGuestPhone">
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" onclick="submitEditGuest()">Save Changes</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Import CSV -->
   <div class="modal-overlay" id="importModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('importModal')">&times;</span>
-      <h3>Import Guests from CSV</h3>
-      <p style="font-size:12px; color:#888; margin-bottom:10px;">CSV format: <b>name,phone</b> — one guest per line. First row can be a header (it'll be skipped if it says "name").</p>
-      <input type="file" id="csvFileInput" accept=".csv">
-      <button class="btn full" id="importBtn" onclick="submitImport()" style="margin-top:10px;">Import</button>
-      <div id="importStatus" style="font-size:13px; margin-top:8px;"></div>
+      <div class="modal-head">
+        <div class="modal-icon">⇪</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Guests</div>
+          <h3 class="modal-title">Import Guests from CSV</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('importModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p class="hint">CSV format: <b>name,phone</b> — one guest per line. First row can be a header (it'll be skipped if it says "name").</p>
+        <input type="file" id="csvFileInput" accept=".csv">
+        <div id="importStatus" style="font-size:13px; margin-top:8px; color:#475569;"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" id="importBtn" onclick="submitImport()">Import</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Generate Tickets -->
   <div class="modal-overlay" id="generateModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('generateModal')">&times;</span>
-      <h3>Generate Ticket</h3>
-      <label>Select Ticket</label>
-      <select id="ticketGuestSelect"></select>
-      <div class="ticket-preview" id="ticketPreview"></div>
-      <button class="btn full" onclick="printTicket()">🖨 Print This Ticket</button>
-      <button class="btn full secondary" style="margin-top:8px;" onclick="generateAllTickets()">Print All Unused Tickets</button>
+      <div class="modal-head">
+        <div class="modal-icon">🖨</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Guests</div>
+          <h3 class="modal-title">Generate Ticket</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('generateModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <label>Select Ticket</label>
+        <select id="ticketGuestSelect"></select>
+        <div class="ticket-preview" id="ticketPreview"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" onclick="printTicket()">🖨 Print This Ticket</button>
+        <button class="btn full secondary" onclick="generateAllTickets()">Print All Unused Tickets</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Add Staff -->
   <div class="modal-overlay" id="addStaffModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('addStaffModal')">&times;</span>
-      <h3>Add Staff Member</h3>
-      <label>Name</label>
-      <input id="newStaffName">
-      <label>Email</label>
-      <input id="newStaffEmail" type="email">
-      <label>Temporary Password</label>
-      <input id="newStaffPassword">
-      <button class="btn full" id="addStaffBtn" onclick="submitAddStaff()">Add Staff</button>
+      <div class="modal-head">
+        <div class="modal-icon">🧑‍💼</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Staff</div>
+          <h3 class="modal-title">Add Staff Member</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('addStaffModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <label>Name</label>
+        <input id="newStaffName">
+        <label>Email</label>
+        <input id="newStaffEmail" type="email">
+        <label>Temporary Password</label>
+        <input id="newStaffPassword">
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" id="addStaffBtn" onclick="submitAddStaff()">Add Staff</button>
+      </div>
     </div>
   </div>
 
   <!-- MODAL: Reset Staff Password -->
   <div class="modal-overlay" id="resetPwModal">
     <div class="modal">
-      <span class="modal-close" onclick="closeModal('resetPwModal')">&times;</span>
-      <h3>Reset Password</h3>
-      <input type="hidden" id="resetPwUserId">
-      <label>New Password</label>
-      <input id="resetPwNew">
-      <button class="btn full" onclick="submitResetPassword()">Reset Password</button>
+      <div class="modal-head">
+        <div class="modal-icon">🔑</div>
+        <div class="modal-headtext">
+          <div class="modal-eyebrow">Staff</div>
+          <h3 class="modal-title">Reset Password</h3>
+        </div>
+        <span class="modal-close" onclick="closeModal('resetPwModal')">&times;</span>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="resetPwUserId">
+        <label>New Password</label>
+        <input id="resetPwNew">
+      </div>
+      <div class="modal-foot">
+        <button class="btn full" onclick="submitResetPassword()">Reset Password</button>
+      </div>
     </div>
   </div>
 
@@ -417,7 +636,6 @@
       const banner = document.getElementById('loadErrorBanner') || (() => {
         const b = document.createElement('div');
         b.id = 'loadErrorBanner';
-        b.style.cssText = 'background:#fee2e2;color:#b91c1c;padding:10px 16px;font-size:13px;white-space:pre-wrap;';
         document.body.insertBefore(b, document.body.firstChild.nextSibling);
         return b;
       })();
@@ -452,14 +670,14 @@
           <div class="bar-fill" style="width:${(d.hourly[h]/max*100)}%"></div>
           <div>${d.hourly[h]}</div>
         </div>
-      `).join('') : '<p style="color:#888; font-size:13px;">No check-ins yet.</p>';
+      `).join('') : '<p style="color:var(--muted); font-size:13px;">No check-ins yet.</p>';
 
       document.getElementById('recentActivity').innerHTML = d.recent.length ? d.recent.map(r => `
         <div class="activity-item">
           <span>${r.name}</span>
-          <span style="color:#888;">${r.time} · ${r.by}</span>
+          <span>${r.time} · ${r.by}</span>
         </div>
-      `).join('') : '<p style="color:#888; font-size:13px;">No activity yet.</p>';
+      `).join('') : '<p style="color:var(--muted); font-size:13px;">No activity yet.</p>';
     }
 
     async function exportCSV() {
@@ -484,7 +702,7 @@
       document.getElementById('guestsTableBody').innerHTML = filtered.map(g => `
         <tr>
           <td>${g['Ticket ID']}</td>
-          <td>${g.Name || '<span style="color:#aaa;">—</span>'}</td>
+          <td>${g.Name || '<span style="color:#5b6b8c;">—</span>'}</td>
           <td><span class="badge ${g.Status === 'Used' ? 'used' : 'unused'}">${g.Status}</span></td>
           <td>
             <div class="row-actions">
