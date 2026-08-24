@@ -5,42 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EventPass Staff</title>
   <script src="js/html5-qrcode.min.js"></script>
+  <script>
+    // Applied before paint so there's no flash of the wrong theme.
+    (function () {
+      const saved = localStorage.getItem('ep_theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
   <style>
     :root{
       --bg:#0b1220;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
+        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
       --panel:rgba(16,26,46,.90);
       --line:rgba(255,255,255,.08);
       --text:#e8eefc;
       --muted:#90a0c0;
+      --placeholder:#5b6b8c;
       --brand:#4f46e5;
+      --brand-tint:rgba(79,70,229,.06);
       --teal:#14b8a6;
       --success:#22c55e;
       --warn:#f59e0b;
       --danger:#ef4444;
       --shadow:0 24px 70px rgba(0,0,0,.32);
+      --header-bg:rgba(11,18,32,.85);
+      --chip-bg:rgba(255,255,255,.04);
+      --menu-icon-bg:rgba(255,255,255,.14);
+      --search-bg:rgba(255,255,255,.03);
+      color-scheme: dark;
+    }
+    [data-theme="light"]{
+      --bg:#eef1f7;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #4f46e51f 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a61f 0%, transparent 55%),
+        linear-gradient(180deg,#eef1f7 0%, #e6eaf4 100%);
+      --panel:rgba(255,255,255,.82);
+      --line:rgba(15,23,42,.09);
+      --text:#0f172a;
+      --muted:#5b6b8c;
+      --placeholder:#94a3b8;
+      --brand-tint:rgba(79,70,229,.05);
+      --shadow:0 20px 50px rgba(30,41,90,.14);
+      --header-bg:rgba(255,255,255,.82);
+      --chip-bg:rgba(15,23,42,.05);
+      --menu-icon-bg:rgba(255,255,255,.22);
+      --search-bg:rgba(15,23,42,.03);
+      color-scheme: light;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
       color: var(--text);
-      background:
-        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
-        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
-        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      background: var(--bg-grad);
       background-attachment: fixed;
+      transition: background .25s ease, color .25s ease;
     }
     .header {
       padding: 18px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(11,18,32,.85);
+      background: var(--header-bg);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
       z-index: 50;
+      transition: background .25s ease, border-color .25s ease;
     }
     .header .who { display: flex; align-items: center; gap: 10px; }
     .header .brand-mark {
@@ -52,6 +88,21 @@
     }
     .header h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
     .header .staffname { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .theme-toggle {
+      width: 38px; height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s, transform .1s;
+      flex: 0 0 auto;
+    }
+    .theme-toggle:hover { border-color: rgba(79,70,229,.5); }
+    .theme-toggle:active { transform: scale(.92); }
     .logout {
       color: var(--text);
       font-size: 13px;
@@ -59,7 +110,7 @@
       padding: 9px 14px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: rgba(255,255,255,.04);
+      background: var(--chip-bg);
       transition: border-color .15s, background .15s;
     }
     .logout:hover { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); color: #fca5a5; }
@@ -93,7 +144,7 @@
     .menu button:active { transform: scale(.985); }
     .menu button .menu-icon {
       width: 46px; height: 46px; border-radius: 14px;
-      background: rgba(255,255,255,.14);
+      background: var(--menu-icon-bg);
       display: flex; align-items: center; justify-content: center;
       font-size: 22px; flex: 0 0 auto;
     }
@@ -107,7 +158,7 @@
 
     #reader { width: 100%; border-radius: 18px; overflow: hidden; margin-top: 12px; border: 1px solid var(--line); }
     .back-btn {
-      background: rgba(255,255,255,.04);
+      background: var(--chip-bg);
       border: 1px solid var(--line);
       color: var(--text);
       padding: 9px 14px;
@@ -118,7 +169,7 @@
       font-family: inherit;
       transition: border-color .15s, background .15s;
     }
-    .back-btn:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
+    .back-btn:hover { border-color: var(--brand); background: var(--brand-tint); }
 
     .panel {
       background: var(--panel);
@@ -139,14 +190,14 @@
       border-radius: 14px;
       border: 1.5px solid var(--line);
       margin-bottom: 14px;
-      background: rgba(255,255,255,.03);
+      background: var(--search-bg);
       color: var(--text);
       outline: none;
       font-family: inherit;
       transition: border-color .15s, background .15s;
     }
-    .search-input::placeholder { color: #5b6b8c; }
-    .search-input:focus { border-color: var(--brand); background: rgba(79,70,229,.06); }
+    .search-input::placeholder { color: var(--placeholder); }
+    .search-input:focus { border-color: var(--brand); background: var(--brand-tint); }
 
     .result-card {
       background: var(--panel);
@@ -232,7 +283,10 @@
         <div class="staffname" id="staffNameLabel"></div>
       </div>
     </div>
-    <a class="logout" href="#" onclick="logout()">Logout</a>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+      <a class="logout" href="#" onclick="logout()">Logout</a>
+    </div>
   </div>
 
   <div class="wrap">
@@ -312,11 +366,33 @@
         return;
       }
       document.getElementById('staffNameLabel').textContent = staffName;
+      syncThemeToggleIcon();
     };
 
     function logout() {
       sessionStorage.clear();
       location.href = 'index.html';
+    }
+
+    // ---------- THEME ----------
+    function toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('ep_theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('ep_theme', 'light');
+      }
+      syncThemeToggleIcon();
+    }
+
+    function syncThemeToggleIcon() {
+      const btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      btn.textContent = isLight ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
     }
 
     function showView(id) {
