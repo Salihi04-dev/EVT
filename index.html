@@ -4,70 +4,184 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EventPass Lite — Sign In</title>
+  <script>
+    // Applied before paint so there's no flash of the wrong theme.
+    (function () {
+      const saved = localStorage.getItem('ep_theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
   <style>
+    :root{
+      --bg:#0b1220;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
+        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      --text:#e8eefc;
+      --muted:#90a0c0;
+      --brand:#4f46e5;
+      --teal:#14b8a6;
+      --line:rgba(255,255,255,.08);
+      --chip-bg:rgba(255,255,255,.04);
+      /* Sign-in card mirrors scanner.html's popup-card: light surface in both themes */
+      --card-bg:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
+      --card-text:#0f172a;
+      --card-muted:#64748b;
+      --card-line:rgba(15,23,42,.08);
+      --card-line-strong:rgba(15,23,42,.12);
+      --card-shadow:0 30px 90px rgba(0,0,0,.38);
+      --input-bg:#fff;
+      --placeholder:#94a3b8;
+      color-scheme: dark;
+    }
+    [data-theme="light"]{
+      --bg:#eef1f7;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #4f46e51f 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a61f 0%, transparent 55%),
+        linear-gradient(180deg,#eef1f7 0%, #e6eaf4 100%);
+      --text:#0f172a;
+      --muted:#5b6b8c;
+      --line:rgba(15,23,42,.09);
+      --chip-bg:rgba(15,23,42,.05);
+      color-scheme: light;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: var(--bg-grad);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      color: var(--text);
+      transition: background .25s ease, color .25s ease;
     }
+
+    .theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      width: 40px; height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 17px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s, transform .1s;
+      backdrop-filter: blur(10px);
+    }
+    .theme-toggle:hover { border-color: rgba(79,70,229,.5); }
+    .theme-toggle:active { transform: scale(.92); }
+
+    .eyebrow-mark {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .brand-mark {
+      width: 58px; height: 58px; border-radius: 18px;
+      background: linear-gradient(135deg, var(--brand), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 12px 30px rgba(79,70,229,.4);
+    }
+    .eyebrow-mark small {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-weight: 700;
+    }
+
     .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 36px 28px;
+      background: var(--card-bg);
+      color: var(--card-text);
+      border-radius: 28px;
+      padding: 34px 28px 30px;
       width: 100%;
       max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--card-line);
     }
-    .logo { text-align: center; margin-bottom: 24px; }
-    .logo h1 { font-size: 24px; color: #1a1a2e; font-weight: 700; }
-    .logo p { color: #888; font-size: 13px; margin-top: 4px; }
+    .logo { text-align: center; margin-bottom: 26px; }
+    .logo h1 { font-size: 22px; color: var(--card-text); font-weight: 800; letter-spacing: -.01em; }
+    .logo p { color: var(--card-muted); font-size: 13px; margin-top: 6px; }
     label {
-      display: block; font-size: 13px; font-weight: 600; color: #333;
+      display: block; font-size: 11px; font-weight: 700; color: var(--card-muted);
+      text-transform: uppercase; letter-spacing: .06em;
       margin-bottom: 6px; margin-top: 16px;
     }
+    label:first-of-type { margin-top: 0; }
     input {
-      width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0;
-      border-radius: 10px; font-size: 15px; outline: none; transition: border 0.2s;
+      width: 100%; padding: 13px 14px; border: 1.5px solid var(--card-line-strong);
+      border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s, background .2s;
+      background: var(--input-bg); color: var(--card-text); font-family: inherit;
     }
-    input:focus { border-color: #4f46e5; }
+    input::placeholder { color: var(--placeholder); }
+    input:focus { border-color: var(--brand); }
     button {
-      width: 100%; margin-top: 24px; padding: 14px; background: #4f46e5;
-      color: #fff; border: none; border-radius: 10px; font-size: 15px;
-      font-weight: 600; cursor: pointer; transition: background 0.2s;
+      width: 100%; margin-top: 26px; padding: 14px; background: var(--brand);
+      color: #fff; border: none; border-radius: 14px; font-size: 15px;
+      font-weight: 700; cursor: pointer; transition: filter 0.15s, transform .1s;
+      font-family: inherit;
     }
-    button:active { background: #3730a3; }
-    button:disabled { background: #aaa; }
+    button:hover { filter: brightness(1.08); }
+    button:active { transform: scale(.98); }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
     .error {
-      background: #fee2e2; color: #b91c1c; padding: 10px 14px;
-      border-radius: 8px; font-size: 13px; margin-top: 16px; display: none;
+      background: rgba(239,68,68,.1); color: #dc2626; padding: 11px 14px;
+      border: 1px solid rgba(239,68,68,.25);
+      border-radius: 12px; font-size: 13px; margin-top: 16px; display: none;
     }
-    .spinner { display: none; text-align: center; margin-top: 14px; color: #888; font-size: 13px; }
+    .spinner { display: none; text-align: center; margin-top: 14px; color: var(--card-muted); font-size: 13px; }
+    .spinner .dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--brand); margin-right: 6px; vertical-align: -1px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{ opacity:.3 } 50%{ opacity:1 } }
+
+    @media (max-width: 420px) {
+      .card { padding: 28px 20px 24px; border-radius: 24px; }
+      .brand-mark { width: 50px; height: 50px; font-size: 24px; }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <h1>🎟️ EventPass Lite</h1>
-      <p>Sign in to continue</p>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+
+  <div>
+    <div class="eyebrow-mark">
+      <div class="brand-mark">🎟️</div>
+      <small>EventPass Lite</small>
     </div>
 
-    <form id="loginForm">
-      <label>Email</label>
-      <input type="email" id="email" required autocomplete="username">
+    <div class="card">
+      <div class="logo">
+        <h1>Welcome back</h1>
+        <p>Sign in to continue</p>
+      </div>
 
-      <label>Password</label>
-      <input type="password" id="password" required autocomplete="current-password">
+      <form id="loginForm">
+        <label>Email</label>
+        <input type="email" id="email" required autocomplete="username" placeholder="you@example.com">
 
-      <button type="submit" id="submitBtn">Sign In</button>
-    </form>
+        <label>Password</label>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
 
-    <div class="error" id="errorBox"></div>
-    <div class="spinner" id="spinner">Signing in…</div>
+        <button type="submit" id="submitBtn">Sign In</button>
+      </form>
+
+      <div class="error" id="errorBox"></div>
+      <div class="spinner" id="spinner"><span class="dot"></span>Signing in…</div>
+    </div>
   </div>
 
   <script src="js/api.js"></script>
@@ -78,6 +192,8 @@
       if (role === 'Admin' || role === 'Super Admin') location.href = 'admin.html';
       else if (role === 'Staff') location.href = 'staff.html';
     })();
+
+    syncThemeToggleIcon();
 
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
 
@@ -110,6 +226,27 @@
         errorBox.textContent = res.error || 'Something went wrong. Try again.';
         errorBox.style.display = 'block';
       }
+    }
+
+    // ---------- THEME ----------
+    function toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('ep_theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('ep_theme', 'light');
+      }
+      syncThemeToggleIcon();
+    }
+
+    function syncThemeToggleIcon() {
+      const btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      btn.textContent = isLight ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
     }
   </script>
 </body>
