@@ -5,21 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EventPass Admin</title>
   <script src="js/qrcode.min.js"></script>
+  <script>
+    // Applied before paint so there's no flash of the wrong theme.
+    (function () {
+      const saved = localStorage.getItem('ep_theme');
+      if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
     <style>
     :root{
       --bg:#0b1220;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
+        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
       --panel:rgba(16,26,46,.90);
-      --panel-soft:rgba(255,255,255,.03);
+      --panel-hover:rgba(255,255,255,.025);
       --line:rgba(255,255,255,.08);
       --text:#e8eefc;
       --muted:#90a0c0;
+      --placeholder:#5b6b8c;
       --brand:#4f46e5;
       --brand-soft:rgba(79,70,229,.15);
+      --brand-tint:rgba(79,70,229,.06);
       --teal:#14b8a6;
       --success:#22c55e;
       --warn:#f59e0b;
       --danger:#ef4444;
       --shadow:0 24px 70px rgba(0,0,0,.32);
+      --header-bg:rgba(11,18,32,.85);
+      --tabs-bg:rgba(255,255,255,.02);
+      --chip-bg:rgba(255,255,255,.04);
+      --btn-secondary-bg:rgba(255,255,255,.06);
+      --input-bg:rgba(255,255,255,.03);
+      /* Modal/popup surfaces stay light in both themes to match scanner.html's ticket-card language */
+      --modal-bg:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
+      --modal-text:#0f172a;
+      --modal-muted:#64748b;
+      --modal-sub:#475569;
+      --modal-line:rgba(15,23,42,.08);
+      --modal-line-strong:rgba(15,23,42,.12);
+      --modal-shadow:0 30px 90px rgba(0,0,0,.38);
+      --modal-input-bg:#fff;
+      --modal-close-hover:rgba(15,23,42,.06);
+      color-scheme: dark;
+    }
+    [data-theme="light"]{
+      --bg:#eef1f7;
+      --bg-grad:
+        radial-gradient(900px 500px at 10% 0%, #4f46e51f 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a61f 0%, transparent 55%),
+        linear-gradient(180deg,#eef1f7 0%, #e6eaf4 100%);
+      --panel:rgba(255,255,255,.82);
+      --panel-hover:rgba(15,23,42,.03);
+      --line:rgba(15,23,42,.09);
+      --text:#0f172a;
+      --muted:#5b6b8c;
+      --placeholder:#94a3b8;
+      --brand-soft:rgba(79,70,229,.12);
+      --brand-tint:rgba(79,70,229,.05);
+      --shadow:0 20px 50px rgba(30,41,90,.14);
+      --header-bg:rgba(255,255,255,.82);
+      --tabs-bg:rgba(15,23,42,.02);
+      --chip-bg:rgba(15,23,42,.04);
+      --btn-secondary-bg:rgba(15,23,42,.05);
+      --input-bg:rgba(15,23,42,.03);
+      color-scheme: light;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
@@ -27,25 +78,24 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: var(--text);
       min-height: 100vh;
-      background:
-        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
-        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
-        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      background: var(--bg-grad);
       background-attachment: fixed;
       padding-bottom: 40px;
+      transition: background .25s ease, color .25s ease;
     }
 
     .header {
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(11,18,32,.85);
+      background: var(--header-bg);
       backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--line);
       padding: 16px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background .25s ease, border-color .25s ease;
     }
     .header .brand { display: flex; align-items: center; gap: 10px; }
     .header .brand-mark {
@@ -57,6 +107,21 @@
     }
     .header .brand small { display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px }
     .header h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .header .header-actions { display: flex; align-items: center; gap: 8px; }
+    .theme-toggle {
+      width: 38px; height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip-bg);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s, transform .1s;
+      flex: 0 0 auto;
+    }
+    .theme-toggle:hover { border-color: rgba(79,70,229,.5); }
+    .theme-toggle:active { transform: scale(.92); }
     .header a.logout-link {
       color: var(--text);
       font-size: 13px;
@@ -64,7 +129,7 @@
       padding: 9px 14px;
       border: 1px solid var(--line);
       border-radius: 999px;
-      background: rgba(255,255,255,.04);
+      background: var(--chip-bg);
       transition: border-color .15s, background .15s;
     }
     .header a.logout-link:hover { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); color: #fca5a5; }
@@ -73,7 +138,7 @@
       display: flex;
       overflow-x: auto;
       gap: 4px;
-      background: rgba(255,255,255,.02);
+      background: var(--tabs-bg);
       border-bottom: 1px solid var(--line);
       padding: 0 16px;
       scrollbar-width: none;
@@ -137,7 +202,7 @@
     th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); }
     th { color: var(--muted); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
     tbody tr { transition: background .12s; }
-    tbody tr:hover { background: rgba(255,255,255,.025); }
+    tbody tr:hover { background: var(--panel-hover); }
     tbody tr:last-child td { border-bottom: none; }
 
     .badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; display: inline-block; }
@@ -154,14 +219,14 @@
       font-size: 14px;
       margin-bottom: 12px;
       outline: none;
-      background: rgba(255,255,255,.03);
+      background: var(--input-bg);
       color: var(--text);
       font-family: inherit;
       transition: border-color .15s, background .15s;
     }
-    input::placeholder { color: #5b6b8c; }
-    input:focus, select:focus, textarea:focus { border-color: var(--brand); background: rgba(79,70,229,.06); }
-    select option { background: #0f172a; color: var(--text); }
+    input::placeholder { color: var(--placeholder); }
+    input:focus, select:focus, textarea:focus { border-color: var(--brand); background: var(--brand-tint); }
+    select option { background: var(--panel); color: var(--text); }
     label { font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
 
     .btn {
@@ -179,7 +244,7 @@
     .btn:hover { filter: brightness(1.1); }
     .btn:active { transform: scale(.98); }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
-    .btn.secondary { background: rgba(255,255,255,.06); border: 1px solid var(--line); color: var(--text); }
+    .btn.secondary { background: var(--btn-secondary-bg); border: 1px solid var(--line); color: var(--text); }
     .btn.danger { background: linear-gradient(180deg,#ef4444 0%, #dc2626 100%); }
     .btn.full { width: 100%; }
     .btn-sm { padding: 7px 11px; font-size: 12px; border-radius: 9px; }
@@ -214,11 +279,11 @@
     .modal {
       width: 100%; max-width: 440px;
       border-radius: 28px;
-      background: linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);
-      color: #0f172a;
-      box-shadow: 0 30px 90px rgba(0,0,0,.38);
+      background: var(--modal-bg);
+      color: var(--modal-text);
+      box-shadow: var(--modal-shadow);
       overflow: hidden;
-      border: 1px solid rgba(15,23,42,.08);
+      border: 1px solid var(--modal-line);
       max-height: 88vh;
       display: flex;
       flex-direction: column;
@@ -228,7 +293,7 @@
       display: flex;
       gap: 14px;
       align-items: flex-start;
-      border-bottom: 1px solid rgba(15,23,42,.08);
+      border-bottom: 1px solid var(--modal-line);
       flex: 0 0 auto;
     }
     .modal-icon {
@@ -238,23 +303,23 @@
       background: var(--brand-soft); color: var(--brand);
     }
     .modal-headtext { flex: 1 1 auto; min-width: 0; }
-    .modal-eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: #64748b; margin-bottom: 4px; }
+    .modal-eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: var(--modal-muted); margin-bottom: 4px; }
     .modal h3.modal-title { font-size: 20px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
-    .modal-sub { font-size: 13px; color: #475569; line-height: 1.5; margin-top: 4px; }
+    .modal-sub { font-size: 13px; color: var(--modal-sub); line-height: 1.5; margin-top: 4px; }
     .modal-close {
       cursor: pointer; font-size: 18px; color: #94a3b8; flex: 0 0 auto;
       width: 30px; height: 30px; border-radius: 999px; display: flex;
       align-items: center; justify-content: center; transition: background .12s, color .12s;
       line-height: 1;
     }
-    .modal-close:hover { background: rgba(15,23,42,.06); color: #0f172a; }
+    .modal-close:hover { background: var(--modal-close-hover); color: var(--modal-text); }
     .modal-body { padding: 18px 22px 4px; overflow-y: auto; }
     .modal-body label:first-child { margin-top: 0; }
     .modal-foot { padding: 16px 22px 22px; flex: 0 0 auto; display: flex; gap: 10px; flex-wrap: wrap; }
     .modal-foot .btn { flex: 1 1 140px; }
 
     .modal input, .modal select, .modal textarea {
-      background: #fff; border: 1.5px solid rgba(15,23,42,.12); color: #0f172a;
+      background: var(--modal-input-bg); border: 1.5px solid var(--modal-line-strong); color: var(--modal-text);
     }
     .modal input::placeholder { color: #94a3b8; }
     .modal input:focus, .modal select:focus { border-color: var(--brand); background: #fff; }
@@ -308,7 +373,10 @@
         <h2>Admin</h2>
       </div>
     </div>
-    <a class="logout-link" href="#" onclick="logout()">Logout</a>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
+      <a class="logout-link" href="#" onclick="logout()">Logout</a>
+    </div>
   </div>
 
   <div class="tabs">
@@ -597,12 +665,34 @@
         location.href = 'index.html';
         return;
       }
+      syncThemeToggleIcon();
       loadEverything();
     };
 
     function logout() {
       sessionStorage.clear();
       location.href = 'index.html';
+    }
+
+    // ---------- THEME ----------
+    function toggleTheme() {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('ep_theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('ep_theme', 'light');
+      }
+      syncThemeToggleIcon();
+    }
+
+    function syncThemeToggleIcon() {
+      const btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      btn.textContent = isLight ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', isLight ? 'Switch to dark theme' : 'Switch to light theme');
     }
 
     async function loadEverything() {
