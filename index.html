@@ -152,7 +152,127 @@
       .card { padding: 28px 20px 24px; border-radius: 24px; }
       .brand-mark { width: 50px; height: 50px; font-size: 24px; }
     }
-  </style>
+  
+/* EventPass Light UI — visual layer only. Existing markup, IDs, handlers and auth logic are untouched. */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f7fb;
+  --bg-grad:
+    radial-gradient(900px 600px at 6% 4%, rgba(85,77,232,.16) 0%, transparent 55%),
+    radial-gradient(760px 540px at 100% 92%, rgba(10,167,122,.13) 0%, transparent 54%),
+    linear-gradient(135deg, #f8fafc 0%, #eef3f8 100%);
+  --text: #16263f;
+  --muted: #6f8096;
+  --brand: #554de8;
+  --teal: #0aa77a;
+  --line: #dce4ee;
+  --chip-bg: rgba(255,255,255,.76);
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,.98) 0%, rgba(250,252,255,.98) 100%);
+  --card-text: #14243d;
+  --card-muted: #6d7d92;
+  --card-line: #dbe5ef;
+  --card-line-strong: #ccd8e5;
+  --card-shadow: 0 28px 80px rgba(26,43,72,.14), 0 8px 24px rgba(26,43,72,.06);
+  --input-bg: #fbfcfe;
+  --placeholder: #a0adbb;
+}
+
+html { background: #f4f7fb; }
+body {
+  color: var(--text);
+  background: var(--bg-grad);
+  background-attachment: fixed;
+}
+.theme-toggle { display: none !important; }
+
+body > div {
+  width: min(100%, 410px);
+  position: relative;
+  z-index: 1;
+}
+body::before {
+  content: '';
+  position: fixed;
+  width: 420px; height: 420px;
+  left: -210px; bottom: -230px;
+  border-radius: 50%;
+  background: rgba(85,77,232,.06);
+  filter: blur(8px);
+  pointer-events: none;
+}
+body::after {
+  content: '';
+  position: fixed;
+  width: 300px; height: 300px;
+  right: -170px; top: -140px;
+  border-radius: 50%;
+  background: rgba(10,167,122,.07);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.eyebrow-mark { gap: 12px; margin-bottom: 18px; }
+.brand-mark {
+  width: 64px; height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #625bf0 0%, #3f45b8 100%);
+  box-shadow: 0 16px 34px rgba(85,77,232,.22), inset 0 1px 0 rgba(255,255,255,.20);
+  border: 1px solid rgba(255,255,255,.72);
+}
+.eyebrow-mark small {
+  color: #718198;
+  font-size: 10px;
+  letter-spacing: .20em;
+}
+
+.card {
+  border: 1px solid var(--card-line);
+  border-radius: 24px;
+  padding: 34px 30px 30px;
+  box-shadow: var(--card-shadow);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #5d57ee, #18a97f);
+}
+.logo { margin-bottom: 26px; }
+.logo h1 { color: #152640; font-size: 24px; letter-spacing: -.025em; }
+.logo p { color: #718198; }
+label { color: #708198; }
+input {
+  background: #fff;
+  border-color: #ccd8e5;
+  border-radius: 13px;
+  box-shadow: inset 0 1px 1px rgba(22,38,63,.025);
+}
+input:focus {
+  border-color: #655fe9;
+  box-shadow: 0 0 0 4px rgba(85,77,232,.08);
+}
+button[type="submit"] {
+  margin-top: 24px;
+  background: linear-gradient(135deg, #5b55ea 0%, #433bc0 100%);
+  border: 1px solid rgba(57,52,169,.25);
+  box-shadow: 0 12px 22px rgba(85,77,232,.20);
+  letter-spacing: .005em;
+}
+button[type="submit"]:hover { filter: brightness(1.04); }
+.error { background: #fff2f4; color: #c4384d; border-color: #f0cbd2; }
+.spinner { color: #718198; }
+.spinner .dot { background: #554de8; }
+
+@media (max-width: 420px) {
+  body { padding: 16px; }
+  .card { padding: 32px 22px 26px; }
+}
+
+</style>
 </head>
 <body>
   <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle light and dark theme" title="Toggle theme">🌙</button>
