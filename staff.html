@@ -6,180 +6,296 @@
   <title>EventPass Staff</title>
   <script src="js/html5-qrcode.min.js"></script>
   <style>
+    :root{
+      --bg:#0b1220;
+      --panel:rgba(16,26,46,.90);
+      --line:rgba(255,255,255,.08);
+      --text:#e8eefc;
+      --muted:#90a0c0;
+      --brand:#4f46e5;
+      --teal:#14b8a6;
+      --success:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --shadow:0 24px 70px rgba(0,0,0,.32);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #16213e;
       min-height: 100vh;
-      color: #fff;
+      color: var(--text);
+      background:
+        radial-gradient(900px 500px at 10% 0%, #1d4ed833 0%, transparent 60%),
+        radial-gradient(700px 500px at 90% 15%, #14b8a633 0%, transparent 55%),
+        linear-gradient(180deg,#0b1220 0%, #0f172a 100%);
+      background-attachment: fixed;
     }
     .header {
       padding: 18px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #1a1a2e;
+      background: rgba(11,18,32,.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
-    .header h2 { font-size: 17px; }
-    .header .staffname { font-size: 12px; color: #aaa; }
-    .logout { color: #f87171; font-size: 13px; text-decoration: none; }
+    .header .who { display: flex; align-items: center; gap: 10px; }
+    .header .brand-mark {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--brand), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex: 0 0 auto;
+      box-shadow: 0 8px 20px rgba(79,70,229,.35);
+    }
+    .header h2 { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+    .header .staffname { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .logout {
+      color: var(--text);
+      font-size: 13px;
+      text-decoration: none;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      transition: border-color .15s, background .15s;
+    }
+    .logout:hover { border-color: rgba(239,68,68,.5); background: rgba(239,68,68,.08); color: #fca5a5; }
+
+    .wrap { max-width: 560px; margin: 0 auto; padding: 8px 16px 32px; }
 
     .menu {
-      padding: 24px 16px;
+      padding: 22px 0 8px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
     .menu button {
-      padding: 28px 20px;
-      font-size: 19px;
+      padding: 26px 22px;
+      font-size: 17px;
       font-weight: 700;
-      border: none;
-      border-radius: 16px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
       cursor: pointer;
       color: #fff;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      transition: transform .12s, filter .15s;
+      font-family: inherit;
     }
-    .btn-scan { background: #4f46e5; }
-    .btn-search { background: #059669; }
-    .btn-manual { background: #d97706; }
+    .menu button:hover { filter: brightness(1.08); }
+    .menu button:active { transform: scale(.985); }
+    .menu button .menu-icon {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: rgba(255,255,255,.14);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex: 0 0 auto;
+    }
+    .menu button .menu-text small { display: block; font-size: 12px; font-weight: 500; opacity: .8; margin-top: 2px; }
+    .btn-scan { background: linear-gradient(135deg, var(--brand), #6366f1); }
+    .btn-search { background: linear-gradient(135deg, #059669, var(--teal)); }
+    .btn-manual { background: linear-gradient(135deg, #d97706, #f59e0b); }
 
-    .view { display: none; padding: 16px; }
+    .view { display: none; padding-top: 8px; }
     .view.active { display: block; }
 
-    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-top: 10px; }
+    #reader { width: 100%; border-radius: 18px; overflow: hidden; margin-top: 12px; border: 1px solid var(--line); }
     .back-btn {
-      background: none;
-      border: 1px solid #555;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 999px;
       font-size: 13px;
       cursor: pointer;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      font-family: inherit;
+      transition: border-color .15s, background .15s;
     }
+    .back-btn:hover { border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 20px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      line-height: 1.6;
+    }
+    .panel h3 { font-size: 17px; margin-bottom: 8px; }
+    .panel p { color: var(--muted); font-size: 13px; }
 
     .search-input {
       width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
+      padding: 14px 16px;
+      font-size: 15px;
+      border-radius: 14px;
+      border: 1.5px solid var(--line);
       margin-bottom: 14px;
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+      transition: border-color .15s, background .15s;
     }
-    .result-card {
-      background: #1e2a4a;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 10px;
-    }
-    .result-card .name { font-size: 17px; font-weight: 700; }
-    .result-card .ticket { color: #93c5fd; font-size: 13px; margin: 4px 0; }
-    .result-card .status { font-size: 13px; padding: 3px 10px; border-radius: 20px; display: inline-block; }
-    .status.unused { background: #059669; }
-    .status.used { background: #6b7280; }
-    .checkin-btn {
-      margin-top: 10px;
-      width: 100%;
-      padding: 12px;
-      background: #4f46e5;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .checkin-btn:disabled { background: #4b5563; }
+    .search-input::placeholder { color: #5b6b8c; }
+    .search-input:focus { border-color: var(--brand); background: rgba(79,70,229,.06); }
 
-    .popup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      padding: 20px;
+    .result-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
     }
-    .popup.active { display: flex; }
-    .popup-card {
-      background: #fff;
-      color: #1a1a2e;
-      border-radius: 16px;
-      padding: 28px;
-      max-width: 340px;
+    .result-card .name { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .result-card .ticket { color: var(--muted); font-size: 13px; margin: 4px 0; }
+    .result-card .status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-block; text-transform: uppercase; letter-spacing: .05em; margin-top: 6px; }
+    .status.unused { background: rgba(34,197,94,.15); color: #4ade80; }
+    .status.used { background: rgba(148,163,184,.15); color: #94a3b8; }
+    .no-matches { color: var(--muted); font-size: 13px; padding: 4px 2px; }
+    .checkin-btn {
+      margin-top: 12px;
       width: 100%;
-      text-align: center;
-    }
-    .popup-card.valid { border-top: 8px solid #059669; }
-    .popup-card.used { border-top: 8px solid #d97706; }
-    .popup-card.invalid { border-top: 8px solid #dc2626; }
-    .popup-icon { font-size: 40px; margin-bottom: 8px; }
-    .popup-card h3 { font-size: 20px; margin-bottom: 6px; }
-    .popup-card p { color: #666; font-size: 14px; margin: 2px 0; }
-    .popup-close {
-      margin-top: 18px;
-      width: 100%;
-      padding: 12px;
-      background: #1a1a2e;
+      padding: 13px;
+      background: var(--brand);
       color: #fff;
       border: none;
-      border-radius: 8px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
+      font-family: inherit;
+      transition: filter .15s, transform .1s;
+    }
+    .checkin-btn:hover { filter: brightness(1.1); }
+    .checkin-btn:active { transform: scale(.98); }
+    .checkin-btn:disabled { background: #4b5563; cursor: not-allowed; }
+
+    /* ---- Popup, mirrored 1:1 from scanner.html ---- */
+    .popup{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.68);padding:18px;z-index:999}
+    .popup.active{display:flex}
+    .popup-card{width:100%;max-width:480px;border-radius:28px;background:linear-gradient(180deg,#ffffff 0%, #f8fbff 100%);color:#0f172a;box-shadow:0 30px 90px rgba(0,0,0,.38);overflow:hidden;border:1px solid rgba(15,23,42,.08)}
+    .popup-card.valid, .popup-card.used, .popup-card.invalid { /* kind now conveyed via icon badge, not a top border */ }
+    .popup-head{padding:22px 22px 16px;display:flex;gap:14px;align-items:flex-start;border-bottom:1px solid rgba(15,23,42,.08)}
+    .popup-icon{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;flex:0 0 auto;background:#eaffef;color:#16a34a}
+    .popup-icon.warn{background:#fff7e6;color:#b45309}
+    .popup-icon.bad{background:#fff1f2;color:#dc2626}
+    .popup-eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;color:#64748b;margin-bottom:6px}
+    .popup-title{font-size:22px;line-height:1.15;margin-bottom:6px;font-weight:800;letter-spacing:-.01em}
+    .popup-subtitle{font-size:14px;color:#475569;line-height:1.5}
+    .popup-body{padding:18px 22px 6px}
+    .popup-actions{display:flex;gap:10px;padding:16px 22px 22px;flex-wrap:wrap}
+    .popup-actions .popup-close{flex:1 1 auto}
+    .popup-close {
+      padding: 13px;
+      background: var(--brand, #4f46e5);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      font-family: inherit;
+      transition: filter .15s;
+    }
+    .popup-close:hover { filter: brightness(1.1); }
+    .popup-card.used .popup-close { background: linear-gradient(180deg,#f59e0b 0%, #d97706 100%); }
+    .popup-card.invalid .popup-close { background: #fff; border: 1px solid rgba(15,23,42,.12); color: #0f172a; }
+    .popup-card.valid .popup-close { background: linear-gradient(180deg,#22c55e 0%, #16a34a 100%); }
+
+    @media (max-width: 560px) {
+      .popup-head{padding:20px 18px 14px}
+      .popup-body{padding:16px 18px 4px}
+      .popup-actions{padding:0 18px 18px}
+      .popup-title{font-size:20px}
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <div>
-      <h2>Staff Panel</h2>
-      <div class="staffname" id="staffNameLabel"></div>
+    <div class="who">
+      <div class="brand-mark">🎟️</div>
+      <div>
+        <h2>Staff Panel</h2>
+        <div class="staffname" id="staffNameLabel"></div>
+      </div>
     </div>
     <a class="logout" href="#" onclick="logout()">Logout</a>
   </div>
 
-  <!-- MAIN MENU -->
-  <div class="view active" id="menuView">
-    <div class="menu">
-      <button class="btn-scan" onclick="openScannerPage()">📷 SCAN QR</button>
-      <button class="btn-search" onclick="showView('searchView')">🔍 SEARCH TICKET</button>
-      <button class="btn-manual" onclick="showView('manualView')">✍️ MANUAL CHECK-IN</button>
+  <div class="wrap">
+    <!-- MAIN MENU -->
+    <div class="view active" id="menuView">
+      <div class="menu">
+        <button class="btn-scan" onclick="openScannerPage()">
+          <span class="menu-icon">📷</span>
+          <span class="menu-text">SCAN QR<small>Open the camera scanner</small></span>
+        </button>
+        <button class="btn-search" onclick="showView('searchView')">
+          <span class="menu-icon">🔍</span>
+          <span class="menu-text">SEARCH TICKET<small>Look up a ticket by ID</small></span>
+        </button>
+        <button class="btn-manual" onclick="showView('manualView')">
+          <span class="menu-icon">✍️</span>
+          <span class="menu-text">MANUAL CHECK-IN<small>Check in without scanning</small></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SCAN VIEW -->
+    <div class="view" id="scanView">
+      <button class="back-btn" onclick="showView('menuView')">← Back</button>
+      <div class="panel">
+        <h3>Scanner opens in a new tab</h3>
+        <p>This keeps camera access working on phones. Open the scanner, then return here for search or manual check-in.</p>
+        <button class="btn-scan" style="margin-top:16px;width:100%;padding:16px 18px;border-radius:16px;border:none;font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;" onclick="openScannerPage()">Open Scanner</button>
+      </div>
+    </div>
+
+    <!-- SEARCH VIEW -->
+    <div class="view" id="searchView">
+      <button class="back-btn" onclick="showView('menuView')">← Back</button>
+      <input class="search-input" id="searchInput" placeholder="Ticket ID" oninput="doSearch()">
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- MANUAL CHECK-IN VIEW -->
+    <div class="view" id="manualView">
+      <button class="back-btn" onclick="showView('menuView')">← Back</button>
+      <input class="search-input" id="manualInput" placeholder="Ticket ID" oninput="doManualSearch()">
+      <div id="manualResults"></div>
     </div>
   </div>
 
-  <!-- SCAN VIEW -->
-  <div class="view" id="scanView">
-    <button class="back-btn" onclick="showView('menuView')">← Back</button>
-    <div style="background:#1e2a4a;border-radius:18px;padding:18px;line-height:1.6;">
-      <h3 style="font-size:18px;margin-bottom:8px;">Scanner opens in a new tab</h3>
-      <p style="color:#cbd5e1;font-size:13px;">This keeps camera access working on phones. Open the scanner, then return here for search or manual check-in.</p>
-      <button class="btn-scan" style="margin-top:14px;width:100%;padding:16px 18px;border-radius:14px;" onclick="openScannerPage()">Open Scanner</button>
-    </div>
-  </div>
-
-  <!-- SEARCH VIEW -->
-  <div class="view" id="searchView">
-    <button class="back-btn" onclick="showView('menuView')">← Back</button>
-    <input class="search-input" id="searchInput" placeholder="Ticket ID" oninput="doSearch()">
-    <div id="searchResults"></div>
-  </div>
-
-  <!-- MANUAL CHECK-IN VIEW -->
-  <div class="view" id="manualView">
-    <button class="back-btn" onclick="showView('menuView')">← Back</button>
-    <input class="search-input" id="manualInput" placeholder="Ticket ID" oninput="doManualSearch()">
-    <div id="manualResults"></div>
-  </div>
-
-  <!-- RESULT POPUP -->
+  <!-- RESULT POPUP, mirrored from scanner.html -->
   <div class="popup" id="popup">
     <div class="popup-card" id="popupCard">
-      <div class="popup-icon" id="popupIcon"></div>
-      <h3 id="popupTitle"></h3>
-      <p id="popupLine1"></p>
-      <p id="popupLine2"></p>
-      <button class="popup-close" onclick="closePopup()">Close</button>
+      <div class="popup-head">
+        <div class="popup-icon" id="popupIcon"></div>
+        <div>
+          <div class="popup-eyebrow" id="popupEyebrow"></div>
+          <div class="popup-title" id="popupTitle"></div>
+          <div class="popup-subtitle" id="popupLine2"></div>
+        </div>
+      </div>
+      <div class="popup-body">
+        <p id="popupLine1" style="font-size:14px;color:#334155;font-variant-numeric:tabular-nums;word-break:break-word;"></p>
+      </div>
+      <div class="popup-actions">
+        <button class="popup-close" onclick="closePopup()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -304,26 +420,33 @@
       const popup = document.getElementById('popup');
       const card = document.getElementById('popupCard');
       const icon = document.getElementById('popupIcon');
+      const eyebrow = document.getElementById('popupEyebrow');
       const title = document.getElementById('popupTitle');
       const l1 = document.getElementById('popupLine1');
       const l2 = document.getElementById('popupLine2');
 
       card.className = 'popup-card';
+      icon.className = 'popup-icon';
       if (res.status === 'VALID') {
         card.classList.add('valid');
-        icon.textContent = '✅';
+        icon.textContent = '✓';
+        eyebrow.textContent = 'CHECK-IN SUCCESSFUL';
         title.textContent = 'Valid Ticket';
         l1.textContent = res.ticketId;
         l2.textContent = 'Checked in at ' + res.checkedInTime;
       } else if (res.status === 'ALREADY_USED') {
         card.classList.add('used');
-        icon.textContent = '⚠️';
+        icon.classList.add('warn');
+        icon.textContent = '⚠';
+        eyebrow.textContent = 'ALREADY USED';
         title.textContent = 'Already Used';
         l1.textContent = res.ticketId;
         l2.textContent = 'Checked in at ' + res.checkedInTime + ' · By ' + res.checkedInBy;
       } else {
         card.classList.add('invalid');
+        icon.classList.add('bad');
         icon.textContent = '❌';
+        eyebrow.textContent = 'INVALID TICKET';
         title.textContent = 'Invalid Ticket';
         l1.textContent = res.error || 'Ticket ID not recognized.';
         l2.textContent = '';
@@ -355,7 +478,7 @@
 
     function renderSearchResults(results) {
       const container = document.getElementById('searchResults');
-      if (!results.length) { container.innerHTML = '<p style="color:#888">No matches.</p>'; return; }
+      if (!results.length) { container.innerHTML = '<p class="no-matches">No matches.</p>'; return; }
       container.innerHTML = results.map(g => `
         <div class="result-card">
           <div class="name">${g['Ticket ID']}</div>
@@ -378,7 +501,7 @@
 
     function renderManualResults(results) {
       const container = document.getElementById('manualResults');
-      if (!results.length) { container.innerHTML = '<p style="color:#888">No matches.</p>'; return; }
+      if (!results.length) { container.innerHTML = '<p class="no-matches">No matches.</p>'; return; }
       container.innerHTML = results.map(g => `
         <div class="result-card">
           <div class="name">${g['Ticket ID']}</div>
